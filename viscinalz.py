@@ -13,8 +13,8 @@ zcel = 3.6666666
 
 # Read in the pdb structure & specify the box size
 parser = Bio.PDB.PDBParser()
-pdb1hlw = parser.get_structure('pdb', 'spc_4_4_2.pdb'); xbox = xcel*4; ybox = ycel*4; zbox = zcel*2
-#pdb1hlw = parser.get_structure('pdb', 'spc_4_4_6.pdb'); xbox = xcel*4; ybox = ycel*4; zbox = zcel*6
+#pdb1hlw = parser.get_structure('pdb', 'spc_4_4_2.pdb'); xbox = xcel*4; ybox = ycel*4; zbox = zcel*2
+pdb1hlw = parser.get_structure('pdb', 'spc_4_4_6.pdb'); xbox = xcel*4; ybox = ycel*4; zbox = zcel*6
 
 shift = np.array([\
         [ xbox,       0,        0      ], \

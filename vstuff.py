@@ -80,3 +80,84 @@ def donorsandacceptors(nni,xyzO,xyzH1,xyzH2,xyzshift):
                     nnitol[i,k]=2
 
     return nnitol, nnltoi
+    
+    
+def fixsurface(nni,nnitol,nnltoi):
+
+
+    # Check for defects
+    Ddefect, Adefect = finddefects(nni,nnltoi,nnitol)
+    #print len(Ddefect), "Ddefects: "
+    #print Ddefect
+    #print len(Adefect), "Adefects: "
+    #print Adefect
+
+
+    #fix Ddefect with a "-1" nearest neighbor:
+    print "Now we are fixing Ddefects ..."
+    for m in range(len(Ddefect)):
+    
+        # Pull out the index to the next residue that has a donor defect
+        i = Ddefect[m,0]
+        l = Ddefect[m,1]
+
+        # See if this residue has any "-1" which means doesn't have a nearest neighbor    
+        test = np.size(np.where(nni[i]<0))
+    
+        # If this defective residue is missing a nearest neighbor, point its hydrogen toward the space
+        if test>0:
+        
+            # Get the positions in nni with the -1, and mutual pointer positions
+            kzeroofi = np.squeeze(np.argwhere(nni[i]<0))
+            klofi = np.squeeze(np.argwhere(nni[i]==l))
+            kiofl = np.squeeze(np.argwhere(nni[l]==i))
+
+            # Fix it by changing nnitol
+            temp = nnitol[i,klofi] # Save which of i's Hydrogens is the donor defective guy
+            nnitol[i,klofi] = 0 # Point i's lone pair to l
+            nnitol[i,kzeroofi] = temp # Point i's Hydrogen to what was -1 
+            nnltoi[l,kiofl] = 0 # Confirms that i no longer points its H to l
+        
+            # Report out
+            print 'fixed ', i, l, ' donor defect'
+        
+    # Check for defects
+    Ddefect, Adefect = finddefects(nni,nnltoi,nnitol)
+    #print len(Ddefect), "Ddefects: "
+    #print Ddefect
+                
+    #Fix Adefect with a "-1" as a nearest neighbor(as long as nnltoi[i] does not have four 0's)
+    #Same logic as fixing Ddefect with "-1" as nearest neighbor
+
+    print "Now we are fixing Adefects ..."
+    for n in range(len(Adefect)):
+        i = Adefect[n,0]
+        l = Adefect[n,1]
+        position = np.where(nni[i]<0)
+        test = np.size(position)
+        if test>0:
+            klofi = np.squeeze(np.argwhere(nni[i]==l))
+            kiofl = np.squeeze(np.argwhere(nni[l]==i))
+        
+            # Figure out which hydrogen is available (if any)
+            timesH1isused = np.size(np.argwhere(nnitol[i]==1))
+            timesH2isused = np.size(np.argwhere(nnitol[i]==2))
+            whichone = 0
+            if timesH1isused == 0:
+                whichone = 1
+            elif timesH2isused == 0:
+                whichone = 2
+            if whichone != 0:
+                #print 'before: ', i,l,nni[i],nni[l],nnitol[i],nnltoi[l]
+                nnitol[i,klofi] = whichone
+                nnltoi[l,kiofl] = whichone
+                #print 'after:  ', i,l,nni[i],nni[l],nnitol[i],nnltoi[l]
+                            # Report out
+                print 'fixed ', i, l, ' acceptor defect'
+ 
+
+    #Ddefect, Adefect = finddefects(nni,nnltoi,nnitol)
+    #print len(Adefect), "Adefects: "
+    #print Adefect
+    
+    return nnitol,nnltoi
