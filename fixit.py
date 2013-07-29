@@ -1,5 +1,6 @@
 import numpy as np
 import vstuff as vs; reload(vs)
+import random
 
 # Get an initial list of donors and acceptors
 nnitol, nnltoi = vs.donorsandacceptors(nni,xyzO,xyzH1,xyzH2,xyzshift)
@@ -27,7 +28,9 @@ for iprop in range(100):
         Hofi = nnitol[i,klofi]; #print Hofi    
 
         # Decide on a new nearest neighbor to point this Hydrogen to
-        klofip = np.squeeze(np.argwhere(nnitol[i]==0)[0]); #print klofip
+        first=np.squeeze(np.argwhere(nnitol[i]==0)[0])
+        second=np.squeeze(np.argwhere(nnitol[i]==0)[1])
+        klofip = random.randint(first,second) #print klofip
         lp = nni[i,klofip]; #print lp
         kioflp = np.squeeze(np.argwhere(nni[lp]==i)); #print kioflp
 
