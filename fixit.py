@@ -28,9 +28,9 @@ for iprop in range(100):
         Hofi = nnitol[i,klofi]; #print Hofi    
 
         # Decide on a new nearest neighbor to point this Hydrogen to
-        first=np.squeeze(np.argwhere(nnitol[i]==0)[0])
+        first=np.squeeze(np.argwhere(nnitol[i]==0)[0]) 
         second=np.squeeze(np.argwhere(nnitol[i]==0)[1])
-        klofip = random.randint(first,second) #print klofip
+        klofip = random.randint(first,second) #sloppy way to get random index
         lp = nni[i,klofip]; #print lp
         kioflp = np.squeeze(np.argwhere(nni[lp]==i)); #print kioflp
 
