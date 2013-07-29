@@ -94,7 +94,7 @@ def fixsurface(nni,nnitol,nnltoi):
 
 
     #fix Ddefect with a "-1" nearest neighbor:
-    print "Now we are fixing Ddefects ..."
+    #print "Now we are fixing Ddefects ..."
     for m in range(len(Ddefect)):
     
         # Pull out the index to the next residue that has a donor defect
@@ -129,7 +129,7 @@ def fixsurface(nni,nnitol,nnltoi):
     #Fix Adefect with a "-1" as a nearest neighbor(as long as nnltoi[i] does not have four 0's)
     #Same logic as fixing Ddefect with "-1" as nearest neighbor
 
-    print "Now we are fixing Adefects ..."
+    #print "Now we are fixing Adefects ..."
     for n in range(len(Adefect)):
         i = Adefect[n,0]
         l = Adefect[n,1]

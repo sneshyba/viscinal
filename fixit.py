@@ -7,6 +7,7 @@ nnitol, nnltoi = vs.donorsandacceptors(nni,xyzO,xyzH1,xyzH2,xyzshift)
 Ddefect, Adefect = vs.finddefects(nni,nnltoi,nnitol)
 print len(Ddefect), len(Adefect)
 print Ddefect
+print Adefect
 
 # Check for surface defects
 nnitol,nnltoi = vs.fixsurface(nni,nnitol,nnltoi)
@@ -14,10 +15,11 @@ Ddefect, Adefect = vs.finddefects(nni,nnltoi,nnitol)
 print len(Ddefect), len(Adefect)
 
 # Propagate a defect and check
-for iprop in range(100):
-
+for iprop in range(500):
     if len(Ddefect) > 0:
-        m = 0
+        print "****"
+        print "Starting iprop = ", iprop, " w/NDdefect, NAdefect = ", len(Ddefect), len(Adefect)
+        m = random.randint(0,len(Ddefect)-1)
         i = Ddefect[m,0]
         l = Ddefect[m,1]
         print "working on ", i, l
@@ -30,7 +32,12 @@ for iprop in range(100):
         # Decide on a new nearest neighbor to point this Hydrogen to
         first=np.squeeze(np.argwhere(nnitol[i]==0)[0]) 
         second=np.squeeze(np.argwhere(nnitol[i]==0)[1])
-        klofip = random.randint(first,second) #sloppy way to get random index
+        zeroorone = random.randint(0,1) #sloppy way to get random index
+        if zeroorone == 0:
+            klofip = first
+        else:
+            klofip = second
+        print "first, second, klofip = ", first, second, klofip
         lp = nni[i,klofip]; #print lp
         kioflp = np.squeeze(np.argwhere(nni[lp]==i)); #print kioflp
 
@@ -42,8 +49,7 @@ for iprop in range(100):
         nnitol[i,klofip] = Hofi
 	nnltoi[lp,kioflp] = Hofi
     
-    # Check for surface defects
-    nnitol,nnltoi = vs.fixsurface(nni,nnitol,nnltoi)
-    Ddefect, Adefect = vs.finddefects(nni,nnltoi,nnitol)
-    print len(Ddefect), len(Adefect)
-    #print Ddefect
+        # Check for surface defects
+        nnitol,nnltoi = vs.fixsurface(nni,nnitol,nnltoi)
+        Ddefect, Adefect = vs.finddefects(nni,nnltoi,nnitol)
+        print "Ending iprop =   ", iprop, " w/NDdefect, NAdefect = ", len(Ddefect), len(Adefect)
