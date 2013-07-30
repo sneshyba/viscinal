@@ -1,6 +1,7 @@
 import numpy as np
 import vstuff as vs; reload(vs)
 import random
+import pdb
 
 # Get an initial list of donors and acceptors
 nnitol, nnltoi = vs.donorsandacceptors(nni,xyzO,xyzH1,xyzH2,xyzshift)
@@ -14,8 +15,11 @@ nnitol,nnltoi = vs.fixsurface(nni,nnitol,nnltoi)
 Ddefect, Adefect = vs.finddefects(nni,nnltoi,nnitol)
 print len(Ddefect), len(Adefect)
 
+#Specifiy number of times through the defect propogation loop
+nprop=500
+
 # Propagate a defect and check
-for iprop in range(500):
+for iprop in range(nprop):
     if len(Ddefect) > 0:
         print "****"
         print "Starting iprop = ", iprop, " w/NDdefect, NAdefect = ", len(Ddefect), len(Adefect)
@@ -49,6 +53,43 @@ for iprop in range(500):
         nnitol[i,klofip] = Hofi
 	nnltoi[lp,kioflp] = Hofi
     
+        # Check for surface defects
+        nnitol,nnltoi = vs.fixsurface(nni,nnitol,nnltoi)
+        Ddefect, Adefect = vs.finddefects(nni,nnltoi,nnitol)
+        print "Ending iprop =   ", iprop, " w/NDdefect, NAdefect = ", len(Ddefect), len(Adefect)
+
+#Propogate Adefects
+for iprop in range(nprop):
+    if len(Adefect) > 0:
+        print "****"
+        
+        print "Starting iprop = ", iprop, " w/NDdefect, NAdefect = ", len(Ddefect), len(Adefect)
+        m = random.randint(0,len(Adefect)-1)
+        i = Adefect[m,0]
+        l = Adefect[m,1]
+        print "working on ", i, l
+        klofi = np.squeeze(np.argwhere(nni[i]==l))
+        kiofl = np.squeeze(np.argwhere(nni[l]==i))
+        
+
+        # Decide on a new nearest neighbor to point this lone pair to
+        knonzeros=np.squeeze(np.argwhere(nnitol[i]!=0))
+        ikrandom = random.randint(0,len(knonzeros)-1) #sloppy way to get random index
+        klofip = knonzeros[ikrandom]
+        print "nnitol[i], klofip = ", nnitol[i], klofip
+        lp = nni[i,klofip]; #print lp
+        kioflp = np.squeeze(np.argwhere(nni[lp]==i)); #print kioflp
+
+        # Point a hydrogen to l instead
+        Hofi=nnitol[i,klofip]
+        nnitol[i,klofi] = Hofi
+        nnltoi[l,kiofl] = Hofi
+    
+        # Point the offending lone pair of i to next victim (nearest neighbor)
+        nnitol[i,klofip] = 0
+	nnltoi[lp,kioflp] = 0
+        
+        #pdb.set_trace()
         # Check for surface defects
         nnitol,nnltoi = vs.fixsurface(nni,nnitol,nnltoi)
         Ddefect, Adefect = vs.finddefects(nni,nnltoi,nnitol)
