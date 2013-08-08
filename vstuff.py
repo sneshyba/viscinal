@@ -161,3 +161,17 @@ def fixsurface(nni,nnitol,nnltoi):
     #print Adefect
     
     return nnitol,nnltoi
+
+def getrefcoords(xyzO,xyzH1,xyzH2):
+    lOH = np.sqrt(np.sum((xyzO-xyzH1)**2))
+    lHH = np.sqrt(np.sum((xyzH2-xyzH1)**2))
+    ycoord = lHH/2
+    theta = np.arccos(ycoord/lOH)
+    zcoord = lOH*np.sin(theta)
+    phi = 2*(np.pi/2-theta)
+    #print theta*180/np.pi, phi*180/np.pi
+    vH1 = np.array([0.,-ycoord,-zcoord])
+    vH2 = np.array([0.,ycoord,-zcoord])
+    vO = np.array([0.,0.,0.])
+    return vO, vH1, vH2
+    
