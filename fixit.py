@@ -2,37 +2,33 @@ import numpy as np
 import vstuff as vs; reload(vs)
 import random
 import pdb
+import copy
 
 # Get an initial list of donors and acceptors
 nnitol, nnltoi = vs.donorsandacceptors(nni,xyzO,xyzH1,xyzH2,xyzshift)
+nnitol_old = copy.deepcopy(nnitol)
 Ddefect, Adefect = vs.finddefects(nni,nnltoi,nnitol)
-print len(Ddefect), len(Adefect)
-print Ddefect
-print Adefect
+print "Starting with defects:", len(Ddefect), len(Adefect)
 
 # Check for surface defects
 nnitol,nnltoi = vs.fixsurface(nni,nnitol,nnltoi)
 Ddefect, Adefect = vs.finddefects(nni,nnltoi,nnitol)
-print len(Ddefect), len(Adefect)
+print "After initial surface fix:", len(Ddefect), len(Adefect)
 
-# Checking ...
-for i in range (nR):
-    test = np.argwhere(nnitol[i]==0)
-    if len(test)>2:
-        print "There's a problem at i, nni, nnitol =", i, nni[i], nnitol[i]
-
-#Specifiy number of times through the defect propogation loop
-nprop=500
+#Specify number of times through the defect propogation loop
+nprop=1000
 
 # Propagate a defect and check
+icount = 0
 for iprop in range(nprop):
     if len(Ddefect) > 0:
-        print "****"
-        print "Starting iprop = ", iprop, " w/NDdefect, NAdefect = ", len(Ddefect), len(Adefect)
+        icount += 1
+        #print "****"
+        #print "Starting iprop = ", iprop, " w/NDdefect, NAdefect = ", len(Ddefect), len(Adefect)
         m = random.randint(0,len(Ddefect)-1)
         i = Ddefect[m,0]
         l = Ddefect[m,1]
-        print "working on ", i, l
+        #print "working on ", i, l
         klofi = np.squeeze(np.argwhere(nni[i]==l))
         kiofl = np.squeeze(np.argwhere(nni[l]==i))
     
@@ -47,7 +43,7 @@ for iprop in range(nprop):
             klofip = first
         else:
             klofip = second
-        print "first, second, klofip = ", first, second, klofip
+        #print "first, second, klofip = ", first, second, klofip
         lp = nni[i,klofip]; #print lp
         kioflp = np.squeeze(np.argwhere(nni[lp]==i)); #print kioflp
 
@@ -60,29 +56,37 @@ for iprop in range(nprop):
 	nnltoi[lp,kioflp] = Hofi
     
         # Check for surface defects
+        #problem1 = vs.findthreezeros(nni,nnitol)
         nnitol,nnltoi = vs.fixsurface(nni,nnitol,nnltoi)
         Ddefect, Adefect = vs.finddefects(nni,nnltoi,nnitol)
-        print "Ending iprop =   ", iprop, " w/NDdefect, NAdefect = ", len(Ddefect), len(Adefect)
+        #problem2 = vs.findthreezeros(nni,nnitol)
+        #if (problem1==False) & (problem2==True):
+        #    print "Fixsurface D is at fault"
+            
+        #    print "... at i = ", i
+        #print "Ending iprop =   ", iprop, " w/NDdefect, NAdefect = ", len(Ddefect), len(Adefect)
+print "After fixing Ddefects:", len(Ddefect), len(Adefect), "which took", icount, "iterations"
 
 #Propagate Adefects
+icount = 0
 for iprop in range(nprop):
     if len(Adefect) > 0:
-        print "****"
+        icount += 1
+        #print "****"
         
-        print "Starting iprop = ", iprop, " w/NDdefect, NAdefect = ", len(Ddefect), len(Adefect)
+        #print "Starting iprop = ", iprop, " w/NDdefect, NAdefect = ", len(Ddefect), len(Adefect)
         m = random.randint(0,len(Adefect)-1)
         i = Adefect[m,0]
         l = Adefect[m,1]
-        print "working on ", i, l
+        #print "working on ", i, l
         klofi = np.squeeze(np.argwhere(nni[i]==l))
-        kiofl = np.squeeze(np.argwhere(nni[l]==i))
-        
+        kiofl = np.squeeze(np.argwhere(nni[l]==i))  
 
         # Decide on a new nearest neighbor to point this lone pair to
         knonzeros=np.squeeze(np.argwhere(nnitol[i]!=0))
         ikrandom = random.randint(0,len(knonzeros)-1) #sloppy way to get random index
         klofip = knonzeros[ikrandom]
-        print "nnitol[i], klofip = ", nnitol[i], klofip
+        #print "nnitol[i], klofip = ", nnitol[i], klofip
         lp = nni[i,klofip]; #print lp
         kioflp = np.squeeze(np.argwhere(nni[lp]==i)); #print kioflp
 
@@ -97,64 +101,18 @@ for iprop in range(nprop):
         
         #pdb.set_trace()
         # Check for surface defects
+        #problem1 = vs.findthreezeros(nni,nnitol)
         nnitol,nnltoi = vs.fixsurface(nni,nnitol,nnltoi)
         Ddefect, Adefect = vs.finddefects(nni,nnltoi,nnitol)
-        print "Ending iprop =   ", iprop, " w/NDdefect, NAdefect = ", len(Ddefect), len(Adefect)
-        
-        
-# Assign missing H1s and H2s to slots
-nnitol_old = copy.deepcopy(nnitol)
+        #problem2 = vs.findthreezeros(nni,nnitol)
+        #if (problem1==False) & (problem2==True):
+        #    print "Fixsurface A is at fault"
+print "After fixing Adefects:", len(Ddefect), len(Adefect), "which took", icount, "iterations"
 
-# Fixing the missing H2 cases
-for i in range (nR):
-        
-    # Find index of H2 for ith residue
-    H2ofi=np.argwhere(nnitol[i]==2)
-    
-    # See if we didn't find H2
-    if len(H2ofi) == 0:
-        
-        # OK, let's find a good place for it
-        test = np.argwhere(nni[i]==-1)
-        if len(test) > 0:
-            
-            # Find a spot that's not being used
-            for j in range(len(test)): 
-            
-                if nnitol[i,test[j]] == 0:
-                    nnitol[i,test[j]]=2
-                    #print nni[i], nnitol[i], nnitol[i]
-                    break
-        else:
-            print "Internal inconsistency ..."
-            f = np.sqrt(-1.0)
-
-# Fixing the missing H1 cases
-for i in range (nR):
-
-    # Find index of H1 for ith residue
-    H1ofi=np.argwhere(nnitol[i]==1)
-    
-    # See if we didn't find H2
-    if len(H1ofi) == 0:
-        
-        # OK, let's find a good place for it
-        test = np.argwhere(nni[i]==-1)
-        if len(test) > 0:
-            
-            # Find a spot that's not being used
-            for j in range(len(test)): 
-            
-                if nnitol[i,test[j]] == 0:
-                    nnitol[i,test[j]]=1
-                    #print nni[i], nnitol[i], nnitol[i]
-                    break
-        else:
-            print "Internal inconsistency ..."
-            f = np.sqrt(-1.0)
-
-# Checking ...
+# Just checking
 for i in range (nR):
     test = np.argwhere(nnitol[i]==0)
-    if len(test)>2:
+    if len(test)!=2:
         print "There's a problem at i, nni, nnitol =", i, nni[i], nnitol[i]
+
+

@@ -31,7 +31,17 @@ def finddefects(nni,nnltoi,nnitol):
     Ddefect_ret = Ddefect[0:nDdefect]
     Adefect_ret = Adefect[0:nAdefect]
     return Ddefect_ret, Adefect_ret
-
+    
+def findthreezeros(nni,nnitol):
+    nR, nk = nni.shape
+    problem = False
+    for i in range (nR):
+        test = np.argwhere(nnitol[i]==0)
+        if len(test)>2:
+            #print "There's a problem at i, nni, nnitol =", i, nni[i], nnitol[i]
+            problem = True
+    return problem
+    
 def donorsandacceptors(nni,xyzO,xyzH1,xyzH2,xyzshift):
 
     # Pre-allocate the nnitol and nnltoi arrays
@@ -78,7 +88,56 @@ def donorsandacceptors(nni,xyzO,xyzH1,xyzH2,xyzshift):
                     nnitol[i,k]=1
                 if np.dot(vOO, vH2O)>HBproject:
                     nnitol[i,k]=2
+    
+    # Fixing the missing H2 cases
+    for i in range (nR):
+        
+        # Find index of H2 for ith residue
+        H2ofi=np.argwhere(nnitol[i]==2)
+    
+        # See if we didn't find H2
+        if len(H2ofi) == 0:
+        
+            # OK, let's find a good place for it
+            test = np.argwhere(nni[i]==-1)
+            if len(test) > 0:
+            
+                # Find a spot that's not being used
+                for j in range(len(test)): 
+            
+                    if nnitol[i,test[j]] == 0:
+                        nnitol[i,test[j]]=2
+                        #print nni[i], nnitol[i], nnitol[i]
+                        break
+            else:
+                print "Internal inconsistency ..."
+                f = np.sqrt(-1.0)
 
+    # Fixing the missing H1 cases
+    for i in range (nR):
+
+        # Find index of H1 for ith residue
+        H1ofi=np.argwhere(nnitol[i]==1)
+    
+        # See if we didn't find H2
+        if len(H1ofi) == 0:
+        
+            # OK, let's find a good place for it
+            test = np.argwhere(nni[i]==-1)
+            if len(test) > 0:
+            
+                # Find a spot that's not being used
+                for j in range(len(test)): 
+            
+                    if nnitol[i,test[j]] == 0:
+                        nnitol[i,test[j]]=1
+                        #print nni[i], nnitol[i], nnitol[i]
+                        break
+            else:
+                print "Internal inconsistency ..."
+                f = np.sqrt(-1.0)
+
+    
     return nnitol, nnltoi
     
     
@@ -87,14 +146,8 @@ def fixsurface(nni,nnitol,nnltoi):
 
     # Check for defects
     Ddefect, Adefect = finddefects(nni,nnltoi,nnitol)
-    #print len(Ddefect), "Ddefects: "
-    #print Ddefect
-    #print len(Adefect), "Adefects: "
-    #print Adefect
-
 
     #fix Ddefect with a "-1" nearest neighbor:
-    #print "Now we are fixing Ddefects ..."
     for m in range(len(Ddefect)):
     
         # Pull out the index to the next residue that has a donor defect
@@ -103,28 +156,27 @@ def fixsurface(nni,nnitol,nnltoi):
 
         # See if this residue has any "-1" which means doesn't have a nearest neighbor    
         test = np.size(np.where(nni[i]<0))
+        kzeroofi = np.squeeze(np.argwhere(nni[i]<0))
+        test2 = nnitol[i,kzeroofi]
     
         # If this defective residue is missing a nearest neighbor, point its hydrogen toward the space
-        if test>0:
+        if (test>0) & (test2==0):
         
-            # Get the positions in nni with the -1, and mutual pointer positions
-            kzeroofi = np.squeeze(np.argwhere(nni[i]<0))
+            # Get the mutual pointer positions
             klofi = np.squeeze(np.argwhere(nni[i]==l))
             kiofl = np.squeeze(np.argwhere(nni[l]==i))
 
             # Fix it by changing nnitol
+            #print 'fixing ', i, l, ' donor defect'
+            #print 'before: ', i,l,nni[i],nni[l],nnitol[i],nnitol[l],nnltoi[l]
             temp = nnitol[i,klofi] # Save which of i's Hydrogens is the donor defective guy
             nnitol[i,klofi] = 0 # Point i's lone pair to l
             nnitol[i,kzeroofi] = temp # Point i's Hydrogen to what was -1 
             nnltoi[l,kiofl] = 0 # Confirms that i no longer points its H to l
-        
-            # Report out
-            print 'fixed ', i, l, ' donor defect'
+            #print 'after: ', i,l,nni[i],nni[l],nnitol[i],nnitol[l],nnltoi[l]
         
     # Check for defects
     Ddefect, Adefect = finddefects(nni,nnltoi,nnitol)
-    #print len(Ddefect), "Ddefects: "
-    #print Ddefect
                 
     #Fix Adefect with a "-1" as a nearest neighbor(as long as nnltoi[i] does not have four 0's)
     #Same logic as fixing Ddefect with "-1" as nearest neighbor
@@ -148,18 +200,13 @@ def fixsurface(nni,nnitol,nnltoi):
             elif timesH2isused == 0:
                 whichone = 2
             if whichone != 0:
-                #print 'before: ', i,l,nni[i],nni[l],nnitol[i],nnltoi[l]
+                #print 'fixing ', i, l, ' acceptor defect'
+                #print 'before: ', i,l,nni[i],nni[l],nnitol[i],nnitol[l],nnltoi[l]
                 nnitol[i,klofi] = whichone
                 nnltoi[l,kiofl] = whichone
-                #print 'after:  ', i,l,nni[i],nni[l],nnitol[i],nnltoi[l]
-                            # Report out
-                print 'fixed ', i, l, ' acceptor defect'
- 
+                #print 'after:  ', i,l,nni[i],nni[l],nnitol[i],nnitol[l],nnltoi[l]
+  
 
-    #Ddefect, Adefect = finddefects(nni,nnltoi,nnitol)
-    #print len(Adefect), "Adefects: "
-    #print Adefect
-    
     return nnitol,nnltoi
 
 def getrefcoords(xyzO,xyzH1,xyzH2):
