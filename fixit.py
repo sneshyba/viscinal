@@ -15,6 +15,12 @@ nnitol,nnltoi = vs.fixsurface(nni,nnitol,nnltoi)
 Ddefect, Adefect = vs.finddefects(nni,nnltoi,nnitol)
 print len(Ddefect), len(Adefect)
 
+# Checking ...
+for i in range (nR):
+    test = np.argwhere(nnitol[i]==0)
+    if len(test)>2:
+        print "There's a problem at i, nni, nnitol =", i, nni[i], nnitol[i]
+
 #Specifiy number of times through the defect propogation loop
 nprop=500
 
@@ -117,7 +123,7 @@ for i in range (nR):
             
                 if nnitol[i,test[j]] == 0:
                     nnitol[i,test[j]]=2
-                    print nni[i], nnitol[i], nnitol[i]
+                    #print nni[i], nnitol[i], nnitol[i]
                     break
         else:
             print "Internal inconsistency ..."
@@ -141,8 +147,14 @@ for i in range (nR):
             
                 if nnitol[i,test[j]] == 0:
                     nnitol[i,test[j]]=1
-                    print nni[i], nnitol[i], nnitol[i]
+                    #print nni[i], nnitol[i], nnitol[i]
                     break
         else:
             print "Internal inconsistency ..."
             f = np.sqrt(-1.0)
+
+# Checking ...
+for i in range (nR):
+    test = np.argwhere(nnitol[i]==0)
+    if len(test)>2:
+        print "There's a problem at i, nni, nnitol =", i, nni[i], nnitol[i]
