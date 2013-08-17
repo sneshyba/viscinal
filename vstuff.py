@@ -654,6 +654,8 @@ def rotateit(xyzO_new, xyzH1_new, xyzH2_new, viscinaldir, shift, vshift, xbox, y
         line1_b = ybox
         line2_m = line1_m
         line2_b = 0.0
+        
+        print Rmat
 
       
         for i in range(nR):
@@ -672,6 +674,14 @@ def rotateit(xyzO_new, xyzH1_new, xyzH2_new, viscinaldir, shift, vshift, xbox, y
 	       xyzO_step2[i,2] = xyzO_step2[i,2] + zboxp
 	       xyzH1_step2[i,2] = xyzH1_step2[i,2] + zboxp
 	       xyzH2_step2[i,2] = xyzH2_step2[i,2] + zboxp
+	   if (xyzO_step2[i,2]<0):
+	       xyzO_step2[i,2] = xyzO_step2[i,2] + zboxp
+	       xyzH1_step2[i,2] = xyzH1_step2[i,2] + zboxp
+	       xyzH2_step2[i,2] = xyzH2_step2[i,2] + zboxp
+	   if (xyzO_step2[i,2]>zboxp):
+	       xyzO_step2[i,2] = xyzO_step2[i,2] - zboxp
+	       xyzH1_step2[i,2] = xyzH1_step2[i,2] - zboxp
+	       xyzH2_step2[i,2] = xyzH2_step2[i,2] - zboxp
 	   if (xyzO_step2[i,2]>zboxp):
 	       xyzO_step2[i,2] = xyzO_step2[i,2] - zboxp
 	       xyzH1_step2[i,2] = xyzH1_step2[i,2] - zboxp
