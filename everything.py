@@ -1,8 +1,8 @@
 import vstuff as vs; reload(vs)
 
 # Get the spc slab (makes new xyzO, xyzH1, xyzH2, and shift-related arrays)
-filename = 'spc_4_4_6.pdb'; nx = 4; ny = 4; nz = 6
-#filename = 'spc_4_4_2.pdb'; nx = 4; ny = 4; nz = 2
+#filename = 'spc_4_4_6.pdb'; nx = 4; ny = 4; nz = 6
+filename = 'spc_4_4_2.pdb'; nx = 4; ny = 4; nz = 2
 viscinaldir = 'y'; nycel=1
 xyzO, xyzH1, xyzH2, viscinaldir, shift, vshift, xbox, ybox, zbox = vs.loadit(filename, nx, ny, nz, viscinaldir, nycel)
 

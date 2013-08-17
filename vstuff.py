@@ -645,7 +645,7 @@ def rotateit(xyzO_new, xyzH1_new, xyzH2_new, viscinaldir, shift, vshift, xbox, y
 
     if viscinaldir == 'y':  
     
-        phi = np.arctan(vshift/zbox)    
+        phi = np.arctan(vshift/zbox); print "phi =", phi*180/np.pi
         zboxp = zbox/np.cos(phi)
         yboxp = ybox*np.cos(phi)
         xboxp = xbox
