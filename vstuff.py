@@ -491,7 +491,7 @@ def fixit(nni, nnitol_in, nnltoi_in, nprop):
             nnitol,nnltoi = fixsurface(nni,nnitol,nnltoi)
             Ddefect, Adefect = finddefects(nni,nnltoi,nnitol)
     print "After fixing Adefects:", len(Ddefect), len(Adefect), "which took", icount, "iterations"
-    return nnitol
+    return nnitol, nnltoi
 
 
 def reconstructit(xyzO, xyzH1, xyzH2, nni, nnitol, xyzshift):
