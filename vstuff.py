@@ -684,9 +684,8 @@ def rotateit(xyzO_new, xyzH1_new, xyzH2_new, viscinaldir, shift, vshift, xbox, y
         line2_m = line1_m
         line2_b = 0.0
         
-        print Rmat
+        #print Rmat
 
-      
         for i in range(nR):
    	   if (xyzO_step1[i,1] > line1_b + line1_m*xyzO_step1[i,2]):
 	       xyzO_step1[i,1] = xyzO_step1[i,1] - ybox
