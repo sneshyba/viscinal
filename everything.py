@@ -10,7 +10,7 @@ filename = 'spc_4_4_6.pdb'; nx = 4; ny = 4; nz = 6
 #filename = 'spc_10_6_12.pdb'; nx = 10; ny = 6; nz = 12
 #filename = 'spc_10_6_14.pdb'; nx = 10; ny = 6; nz = 14
 viscinaldir = 'y'; nycel=1
-xyzO, xyzH1, xyzH2, viscinaldir, shift, vshift, xbox, ybox, zbox = vs.loadit(filename, nx, ny, nz, viscinaldir, nycel)
+xyzO, xyzH1, xyzH2, viscinaldir, shift, vshift, xbox, ybox, zbox, structure = vs.loadit(filename, nx, ny, nz, viscinaldir, nycel)
 
 # Get the nearest neighbor index and nearest-neighbor shift array
 nni,xyzshift = vs.getnni(xyzO,shift) 
@@ -30,11 +30,19 @@ nnitol, nnltoi, Ddefect, Adefect = vs.checkfordefects(nni,xyzO_new,xyzH1_new,xyz
 # Rotate reconstructed xyzO, xyzH1, and xyzH2 arrays to create the viscinal slab
 xyzO_rot, xyzH1_rot, xyzH2_rot, xboxp, yboxp, zboxp = vs.rotateit(xyzO_new, xyzH1_new, xyzH2_new, viscinaldir, shift, vshift, xbox, ybox, zbox)
 
+# Rotate reconstructed xyzO, xyzH1, and xyzH2 arrays to create the viscinal slab
+xyzO_rot_bad, xyzH1_rot_bad, xyzH2_rot_bad, xboxp, yboxp, zboxp = vs.rotateit(xyzO, xyzH1, xyzH2, viscinaldir, shift, vshift, xbox, ybox, zbox)
+
 # Do a simple graph
 execfile("plotit.py")
 
 # Save the new slab
+newfilename = 'spc_4_4_6_v.pdb'
+vs.saveit(newfilename,structure,xyzO_rot, xyzH1_rot, xyzH2_rot)
 
+# Save the new slab
+newfilenamebad = 'spc_4_4_6_vbad.pdb'
+vs.saveit(newfilenamebad,structure,xyzO_rot_bad, xyzH1_rot_bad, xyzH2_rot_bad)
 
 #  Timing
 toc = time.time()
