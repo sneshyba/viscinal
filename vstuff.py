@@ -1,8 +1,8 @@
 import numpy as np
 import copy
 import Bio
-import Bio.PDB
-#import pdb
+import Bio.PDB 
+import pdb
 
 
 def loadit(filename, nx, ny, nz, viscinaldir='y', nycel=1):
@@ -14,8 +14,9 @@ def loadit(filename, nx, ny, nz, viscinaldir='y', nycel=1):
 
     # Read in the pdb structure & specify the box size
     parser = Bio.PDB.PDBParser()
+    #pdb.set_trace()
     #nx = 4; ny = 4, nz = 2
-    pdb1hlw = parser.get_structure('pdb', filename); xbox = xcel*nx; ybox = ycel*ny; zbox = zcel*nz
+    structure = parser.get_structure('pdb', filename); xbox = xcel*nx; ybox = ycel*ny; zbox = zcel*nz
 
     # Set the shift information according to the viscinal surface we want
     if viscinaldir == 'y':
@@ -30,7 +31,7 @@ def loadit(filename, nx, ny, nz, viscinaldir='y', nycel=1):
                 
     # A clumsy way to count the number of residues
     nR = 0
-    for model in pdb1hlw:
+    for model in structure:
         for chain in model:
             j=0
             for residue in chain:
@@ -46,7 +47,7 @@ def loadit(filename, nx, ny, nz, viscinaldir='y', nycel=1):
     xyzH2=np.zeros((nR,3))
 
     # Get all the coordinates
-    for model in pdb1hlw:
+    for model in structure:
         for chain in model:
             j=0
             for residue in chain:
@@ -69,8 +70,36 @@ def loadit(filename, nx, ny, nz, viscinaldir='y', nycel=1):
             xyzH2[i]=xyz[j]
     
     #Return variables
-    return xyzO,xyzH1,xyzH2, viscinaldir, shift, vshift, xbox, ybox, zbox
+    return xyzO,xyzH1,xyzH2, viscinaldir, shift, vshift, xbox, ybox, zbox, structure
 
+def saveit(filename,structure,xyzO,xyzH1,xyzH2):
+
+
+    # Read in the pdb structure & specify the box size
+    #parser = Bio.PDB.PDBParser()
+    IO = Bio.PDB.PDBIO()
+    IO.set_structure(structure)
+
+    # Get all the coordinates
+    i = -1 # residue counter
+    for model in structure:
+        for chain in model:
+            j=0 # atom counter
+            for residue in chain:
+                for atom in residue:
+                    test=np.mod(j,3)
+                    if (test == 0):
+                        i = i+1
+                        temp = xyzO[i]
+                    elif (test ==1):
+                        temp = xyzH1[i]
+                    elif (test == 2):
+                	temp = xyzH2[i]
+                    atom.set_coord(temp)
+                    #print i,np.mod(j,3), temp
+                    j = j+1
+    IO.save(filename)
+    
 def findnbad(nni):
     nR, nk = nni.shape
     nbad = 0
@@ -491,7 +520,7 @@ def fixit(nni, nnitol_in, nnltoi_in, nprop):
             nnitol,nnltoi = fixsurface(nni,nnitol,nnltoi)
             Ddefect, Adefect = finddefects(nni,nnltoi,nnitol)
     print "After fixing Adefects:", len(Ddefect), len(Adefect), "which took", icount, "iterations"
-    return nnitol
+    return nnitol, nnltoi
 
 
 def reconstructit(xyzO, xyzH1, xyzH2, nni, nnitol, xyzshift):
@@ -655,9 +684,8 @@ def rotateit(xyzO_new, xyzH1_new, xyzH2_new, viscinaldir, shift, vshift, xbox, y
         line2_m = line1_m
         line2_b = 0.0
         
-        print Rmat
+        #print Rmat
 
-      
         for i in range(nR):
    	   if (xyzO_step1[i,1] > line1_b + line1_m*xyzO_step1[i,2]):
 	       xyzO_step1[i,1] = xyzO_step1[i,1] - ybox
