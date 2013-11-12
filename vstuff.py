@@ -432,7 +432,7 @@ def checkfordefects(nni,xyzO,xyzH1,xyzH2,xyzshift):
     print "Found defects:", len(Ddefect), len(Adefect)
     return nnitol, nnltoi, Ddefect, Adefect
 
-def fixit(nni, nnitol_in, nnltoi_in, nprop):
+'''def fixit(nni, nnitol_in, nnltoi_in, nprop):
     import random
     #import pdb
     #import copy
@@ -517,6 +517,209 @@ def fixit(nni, nnitol_in, nnltoi_in, nprop):
             nnltoi[lp,kioflp] = 0
         
             #pdb.set_trace()
+            nnitol,nnltoi = fixsurface(nni,nnitol,nnltoi)
+            Ddefect, Adefect = finddefects(nni,nnltoi,nnitol)
+    print "After fixing Adefects:", len(Ddefect), len(Adefect), "which took", icount, "iterations"
+    return nnitol, nnltoi'''
+
+
+#FIXIT REDONE
+def fixit(nni, nnitol_in, nnltoi_in, nprop):
+    import random
+    #import pdb
+    #import copy
+
+    # Fix any surface defects
+    nnitol,nnltoi = fixsurface(nni,nnitol_in,nnltoi_in)
+    Ddefect, Adefect = finddefects(nni,nnltoi,nnitol)
+    print "After initial surface fix:", len(Ddefect), len(Adefect)
+
+    # Propagate a defect and check
+    icount = 0
+    for iprop in range(nprop):
+        if len(Ddefect) > 0:
+            icount += 1
+            #print "****"
+            #print "Starting iprop = ", iprop, " w/NDdefect, NAdefect = ", len(Ddefect), len(Adefect)
+            #m = random.randint(0,(len(Ddefect)/2)-1)
+            i = Ddefect[0,0]
+            l = Ddefect[0,1]
+            #print "working on ", i, l
+            klofi = np.squeeze(np.argwhere(nni[i]==l))
+            kiofl = np.squeeze(np.argwhere(nni[l]==i))
+    
+            # Figure out which Hydrogen of i (1 or 2) is pointing to l
+            Hofi = nnitol[i,klofi]; #print Hofi    
+
+            # Decide on a new nearest neighbor to point this Hydrogen to
+            first=np.squeeze(np.argwhere(nnitol[i]==0)[0]) 
+            second=np.squeeze(np.argwhere(nnitol[i]==0)[1])
+            zeroorone = random.randint(0,1) #sloppy way to get random index
+            if zeroorone == 0:
+                klofip = first
+            else:
+                klofip = second
+            #print "first, second, klofip = ", first, second, klofip
+            lp = nni[i,klofip]; #print lp
+            kioflp = np.squeeze(np.argwhere(nni[lp]==i)); #print kioflp
+
+            # Point a lone pair to l instead
+            nnitol[i,klofi] = 0
+            nnltoi[l,kiofl] = 0
+    
+            # Point the offending hydrogen of i to next victim (nearest neighbor)
+            nnitol[i,klofip] = Hofi
+            nnltoi[lp,kioflp] = Hofi
+            
+            if nnitol[i,klofip]>=1 and nnitol[lp,kioflp]>=1:
+                
+                #change the the value of i and l to trace the defect
+                temp = i
+                i = lp
+                l = temp
+                
+                #See if new i is at the surface
+                test = np.size(np.where(nni[i]<0))
+                
+    
+                # If this defective residue is missing a nearest neighbor, point its hydrogen toward the space
+                if (test>0):
+            
+                    kzeroofi = np.squeeze(np.argwhere(nni[i]<0)[0])
+                    test2 = nnitol[i,kzeroofi]
+            
+                    if (test2==0):
+        
+            
+                        kzeroofi = np.argwhere(nni[i]<0)[0]
+
+            
+                        # Get the mutual pointer positions
+                        klofi = np.squeeze(np.argwhere(nni[i]==l))
+                        kiofl = np.squeeze(np.argwhere(nni[l]==i))
+    
+                        # Fix it by changing nnitol
+                        #print 'fixing ', i, l, ' donor defect'
+                        #print 'before: ', i,l,nni[i],nni[l],nnitol[i],nnitol[l],nnltoi[l]
+                        temp = nnitol[i,klofi] # Save which of i's Hydrogens is the donor defective guy
+                        nnitol[i,klofi] = 0 # Point i's lone pair to l
+                        nnitol[i,kzeroofi] = temp # Point i's Hydrogen to what was -1 
+                        nnltoi[l,kiofl] = 0 # Confirms that i no longer points its H to l
+            
+                #if i is not at the surface then create a new defect to fix existing one
+                else: 
+                     klofi = np.squeeze(np.argwhere(nni[i]==l))
+                     kiofl = np.squeeze(np.argwhere(nni[l]==i))
+    
+                    # Figure out which Hydrogen of i (1 or 2) is pointing to l
+                     Hofi = nnitol[i,klofi]; #print Hofi    
+
+                    # Decide on a new nearest neighbor to point this Hydrogen to
+                     first=np.squeeze(np.argwhere(nnitol[i]==0)[0]) 
+                     second=np.squeeze(np.argwhere(nnitol[i]==0)[1])
+                     zeroorone = random.randint(0,1) #sloppy way to get random index
+                     if zeroorone == 0:
+                         klofip = first
+                     else:
+                         klofip = second
+                    #print "first, second, klofip = ", first, second, klofip
+                     lp = nni[i,klofip]; #print lp
+                     kioflp = np.squeeze(np.argwhere(nni[lp]==i)); #print kioflp
+
+                    # Point a lone pair to l instead
+                     nnitol[i,klofi] = 0
+                     nnltoi[l,kiofl] = 0
+    
+                    # Point the offending hydrogen of i to next victim (nearest neighbor)
+                     nnitol[i,klofip] = Hofi
+                     nnltoi[lp,kioflp] = Hofi
+
+            # Check for surface defects
+            nnitol,nnltoi = fixsurface(nni,nnitol,nnltoi)
+            Ddefect, Adefect = finddefects(nni,nnltoi,nnitol)
+    print "After fixing Ddefects:", len(Ddefect), len(Adefect), "which took", icount, "iterations"
+
+    #Propagate Adefects
+    icount = 0
+    for iprop in range(nprop):
+        if len(Adefect) > 0:
+            icount += 1
+            #print "****"
+        
+            #print "Starting iprop = ", iprop, " w/NDdefect, NAdefect = ", len(Ddefect), len(Adefect)
+            #m = random.randint(0,(len(Adefect)/2)-1)
+            i = Adefect[0,0]
+            l = Adefect[0,1]
+            #print "working on ", i, l
+            klofi = np.squeeze(np.argwhere(nni[i]==l))
+            kiofl = np.squeeze(np.argwhere(nni[l]==i))  
+
+            # Decide on a new nearest neighbor to point this lone pair to
+            knonzeros=np.squeeze(np.argwhere(nnitol[i]!=0))
+            ikrandom = random.randint(0,len(knonzeros)-1) #sloppy way to get random index
+            klofip = knonzeros[ikrandom]
+            #print "nnitol[i], klofip = ", nnitol[i], klofip
+            lp = nni[i,klofip]; #print lp
+            kioflp = np.squeeze(np.argwhere(nni[lp]==i)); #print kioflp
+
+            # Point a hydrogen to l instead
+            Hofi=nnitol[i,klofip]
+            nnitol[i,klofi] = Hofi
+            nnltoi[l,kiofl] = Hofi
+    
+            # Point the offending lone pair of i to next victim (nearest neighbor)
+            nnitol[i,klofip] = 0
+            nnltoi[lp,kioflp] = 0
+            
+            #trace defect through crystal
+            if nnitol[i,klofip]==0 and nnitol[lp,kioflp]==0:
+                
+                #change the the value of i and l to trace the defect
+                temp = i
+                i = lp
+                l = temp
+                
+                test = np.size(np.where(nni[i]<0))
+                
+                #check if surface residue, if so then fix it
+                if test>0:
+                    klofi = np.squeeze(np.argwhere(nni[i])==l)
+                    kiofl=np.squeeze(np.argwhere(nni[l]==i))
+                    
+                    # Figure out which hydrogen is available (if any)
+                    timesH1isused = np.size(np.argwhere(nnitol[i]==1))
+                    timesH2isused = np.size(np.argwhere(nnitol[i]==2))
+                    whichone = 0
+                    if timesH1isused == 0:
+                        whichone = 1
+                    elif timesH2isused == 0:
+                        whichone = 2
+                    if whichone != 0:
+                        nnitol[i,klofi] = whichone
+                        nnltoi[l,kiofl] = whichone
+                        
+                #if i is not at surface - create new defect and check/trace
+                else:
+                    klofi = np.squeeze(np.argwhere(nni[i]==l))
+                    kiofl = np.squeeze(np.argwhere(nni[l]==i))  
+    
+                    # Decide on a new nearest neighbor to point this lone pair to
+                    knonzeros=np.squeeze(np.argwhere(nnitol[i]!=0))
+                    ikrandom = random.randint(0,len(knonzeros)-1) #sloppy way to get random index
+                    klofip = knonzeros[ikrandom]
+                    #print "nnitol[i], klofip = ", nnitol[i], klofip
+                    lp = nni[i,klofip]; #print lp
+                    kioflp = np.squeeze(np.argwhere(nni[lp]==i)); #print kioflp
+
+                    # Point a hydrogen to l instead
+                    Hofi=nnitol[i,klofip]
+                    nnitol[i,klofi] = Hofi
+                    nnltoi[l,kiofl] = Hofi
+            
+                    # Point the offending lone pair of i to next victim (nearest neighbor)
+                    nnitol[i,klofip] = 0
+                    nnltoi[lp,kioflp] = 0  
+                    
             nnitol,nnltoi = fixsurface(nni,nnitol,nnltoi)
             Ddefect, Adefect = finddefects(nni,nnltoi,nnitol)
     print "After fixing Adefects:", len(Ddefect), len(Adefect), "which took", icount, "iterations"
