@@ -28,7 +28,8 @@ nnitol_fixed, nnltoi_fixed = vs.fixit(nni, nnitol, nnltoi, 3000)
 # Reconstruct, rotate, & save a viscinal slab with defects fixed
 xyzO_fixed, xyzH1_fixed, xyzH2_fixed = vs.reconstructit(xyzO, xyzH1, xyzH2, nni, nnitol_fixed, xyzshift)
 xyzO_rot, xyzH1_rot, xyzH2_rot, xboxp, yboxp, zboxp = vs.rotateit(xyzO_fixed, xyzH1_fixed, xyzH2_fixed, viscinaldir, shift, vshift, xbox, ybox, zbox)
-vs.saveit(outfilename,structure,xyzO_rot, xyzH1_rot, xyzH2_rot)
+#vs.saveit(outfilename,structure,xyzO_rot, xyzH1_rot, xyzH2_rot)
+slab1.saveit()
 
 # Rotate & save a viscinal slab that has the original defects
 xyzO_rot_orig, xyzH1_rot_orig, xyzH2_rot_orig, xboxp, yboxp, zboxp = vs.rotateit(xyzO, xyzH1, xyzH2, viscinaldir, shift, vshift, xbox, ybox, zbox)

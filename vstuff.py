@@ -4,6 +4,45 @@ import Bio
 import Bio.PDB 
 import pdb
 
+class slab:
+    def __init__(self):
+        self.xyzO = None
+        self.xyzH1 = None
+        self.xyzH2 = None
+        self.filename = None
+        self.structure = None
+
+    def saveit(self):
+        filename = self.filename
+        structure = self.structure 
+        xyzO = self.xyzO
+        xyzH1 = self.xyzH1
+        xyzH2 = self.xyzH2
+
+        # Read in the pdb structure & specify the box size
+        #parser = Bio.PDB.PDBParser()
+        IO = Bio.PDB.PDBIO()
+        IO.set_structure(structure)
+
+        # Get all the coordinates
+        i = -1 # residue counter
+        for model in structure:
+            for chain in model:
+                j=0 # atom counter
+                for residue in chain:
+                    for atom in residue:
+                        test=np.mod(j,3)
+                        if (test == 0):
+                            i = i+1
+                            temp = xyzO[i]
+                        elif (test ==1):
+                            temp = xyzH1[i]
+                        elif (test == 2):
+                       	    temp = xyzH2[i]
+                        atom.set_coord(temp)
+                        #print i,np.mod(j,3), temp
+                        j = j+1
+        IO.save(filename)
 
 def loadit(filename, nx, ny, nz, viscinaldir='y', nycel=1):
 
