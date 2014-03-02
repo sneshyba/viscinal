@@ -10,7 +10,6 @@ filename = 'spc_4_4_2.pdb'; nx = 4; ny = 4; nz = 2
 # Naming the output file
 dum = filename.find('.pdb')
 outfilename = filename[0:dum]+'_v.pdb'
-badfilename = filename[0:dum]+'_v_orig.pdb'
 
 # Specify which viscinal surface to generate, and load the slab
 viscinaldir = 'y'; nycel=1
@@ -29,17 +28,20 @@ nnitol_fixed, nnltoi_fixed = vs.fixit(nni, nnitol, nnltoi, 3000)
 xyzO_fixed, xyzH1_fixed, xyzH2_fixed = vs.reconstructit(xyzO, xyzH1, xyzH2, nni, nnitol_fixed, xyzshift)
 xyzO_rot, xyzH1_rot, xyzH2_rot, xboxp, yboxp, zboxp = vs.rotateit(xyzO_fixed, xyzH1_fixed, xyzH2_fixed, viscinaldir, shift, vshift, xbox, ybox, zbox)
 
-# Save it
-slab1 = vs.slab(outfilename,structure,xyzO_rot, xyzH1_rot, xyzH2_rot)
-slab1.saveit()
+# Save the good vicinal slab 
+slab_v = vs.slab(outfilename,structure,xyzO_rot, xyzH1_rot, xyzH2_rot)
+slab_v.saveit()
+
+
 
 # Rotate a viscinal slab that has the original defects
-xyzO_rot_orig, xyzH1_rot_orig, xyzH2_rot_orig, xboxp, yboxp, zboxp = vs.rotateit(xyzO, xyzH1, xyzH2, viscinaldir, shift, vshift, xbox, ybox, zbox)
+#xyzO_rot_orig, xyzH1_rot_orig, xyzH2_rot_orig, xboxp, yboxp, zboxp = vs.rotateit(xyzO, xyzH1, xyzH2, viscinaldir, shift, vshift, xbox, ybox, zbox)
 
 # Save it
-vs.saveit(badfilename,structure,xyzO_rot_orig, xyzH1_rot_orig, xyzH2_rot_orig)
-slab2 = vs.slab(badfilename,structure,xyzO_rot_orig, xyzH1_rot_orig, xyzH2_rot_orig)
-slab2.saveit()
+#badfilename = filename[0:dum]+'_v_orig.pdb'
+#vs.saveit(badfilename,structure,xyzO_rot_orig, xyzH1_rot_orig, xyzH2_rot_orig)
+#slab2 = vs.slab(badfilename,structure,xyzO_rot_orig, xyzH1_rot_orig, xyzH2_rot_orig)
+#slab2.saveit()
 
 
 #tic = time.time()

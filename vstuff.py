@@ -5,12 +5,12 @@ import Bio.PDB
 import pdb
 
 class slab:
-    def __init__(self):
-        self.xyzO = None
-        self.xyzH1 = None
-        self.xyzH2 = None
-        self.filename = None
-        self.structure = None
+    def __init__(self,filename,structure,xyzO, xyzH1, xyzH2):
+        self.xyzO = copy.deepcopy(xyzO)
+        self.xyzH1 = copy.deepcopy(xyzH1)
+        self.xyzH2 = copy.deepcopy(xyzH2)
+        self.filename = copy.deepcopy(filename)
+        self.structure = copy.deepcopy(structure)
 
     def saveit(self):
         filename = self.filename
@@ -19,8 +19,7 @@ class slab:
         xyzH1 = self.xyzH1
         xyzH2 = self.xyzH2
 
-        # Read in the pdb structure & specify the box size
-        #parser = Bio.PDB.PDBParser()
+        # Set the pdb structure
         IO = Bio.PDB.PDBIO()
         IO.set_structure(structure)
 
@@ -30,19 +29,45 @@ class slab:
             for chain in model:
                 j=0 # atom counter
                 for residue in chain:
-                    for atom in residue:
-                        test=np.mod(j,3)
-                        if (test == 0):
-                            i = i+1
-                            temp = xyzO[i]
-                        elif (test ==1):
-                            temp = xyzH1[i]
-                        elif (test == 2):
-                       	    temp = xyzH2[i]
-                        atom.set_coord(temp)
-                        #print i,np.mod(j,3), temp
-                        j = j+1
+                        i = i+1 # residue counter
+                        for atom in residue:
+                            test=np.mod(j,3)
+                    	    if (test == 0):
+                                temp = xyzO[i]
+                            elif (test ==1):
+                                temp = xyzH1[i]
+                            elif (test == 2):
+                       	        temp = xyzH2[i]
+                            atom.set_coord(temp)
+                            j = j+1
+        print len(chain)
         IO.save(filename)
+
+
+    def cullout(self,badlist):
+        structure = self.structure 
+        xyzO = self.xyzO
+        xyzH1 = self.xyzH1
+        xyzH2 = self.xyzH2
+
+        # Set the pdb structure
+        IO = Bio.PDB.PDBIO()
+        IO.set_structure(structure)
+
+        # Get all the coordinates
+        i = -1 # residue counter
+        for model in structure:
+            for chain in model:
+                oldchain = copy.deepcopy(chain)
+                j=0 # atom counter
+                for residue in oldchain:
+                    i = i+1 # residue counter
+                    if i in badlist: 
+                        chain.detach_child(residue.id)
+        self.xyzO  = np.delete(xyzO,badlist,0)
+        self.xyzH1 = np.delete(xyzH1,badlist,0)
+        self.xyzH2 = np.delete(xyzH2,badlist,0)
+        self.structure = structure
 
 def loadit(filename, nx, ny, nz, viscinaldir='y', nycel=1):
 
