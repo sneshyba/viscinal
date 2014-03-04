@@ -4,6 +4,70 @@ import Bio
 import Bio.PDB 
 import pdb
 
+class slab:
+    def __init__(self,filename,structure,xyzO, xyzH1, xyzH2):
+        self.xyzO = copy.deepcopy(xyzO)
+        self.xyzH1 = copy.deepcopy(xyzH1)
+        self.xyzH2 = copy.deepcopy(xyzH2)
+        self.filename = copy.deepcopy(filename)
+        self.structure = copy.deepcopy(structure)
+
+    def saveit(self):
+        filename = self.filename
+        structure = self.structure 
+        xyzO = self.xyzO
+        xyzH1 = self.xyzH1
+        xyzH2 = self.xyzH2
+
+        # Set the pdb structure
+        IO = Bio.PDB.PDBIO()
+        IO.set_structure(structure)
+
+        # Get all the coordinates
+        i = -1 # residue counter
+        for model in structure:
+            for chain in model:
+                j=0 # atom counter
+                for residue in chain:
+                        i = i+1 # residue counter
+                        for atom in residue:
+                            test=np.mod(j,3)
+                    	    if (test == 0):
+                                temp = xyzO[i]
+                            elif (test ==1):
+                                temp = xyzH1[i]
+                            elif (test == 2):
+                       	        temp = xyzH2[i]
+                            atom.set_coord(temp)
+                            j = j+1
+        print len(chain)
+        IO.save(filename)
+
+
+    def cullout(self,badlist):
+        structure = self.structure 
+        xyzO = self.xyzO
+        xyzH1 = self.xyzH1
+        xyzH2 = self.xyzH2
+
+        # Set the pdb structure
+        IO = Bio.PDB.PDBIO()
+        IO.set_structure(structure)
+
+        # Get all the coordinates
+        i = -1 # residue counter
+        for model in structure:
+            for chain in model:
+                oldchain = copy.deepcopy(chain)
+                j=0 # atom counter
+                for residue in oldchain:
+                    i = i+1 # residue counter
+                    if i in badlist: 
+                        chain.detach_child(residue.id)
+        self.xyzO  = np.delete(xyzO,badlist,0)
+        self.xyzH1 = np.delete(xyzH1,badlist,0)
+        self.xyzH2 = np.delete(xyzH2,badlist,0)
+        self.structure = structure
 
 def loadit(filename, nx, ny, nz, viscinaldir='y', nycel=1):
 
@@ -469,14 +533,39 @@ def getnni(xyzO,shift):
                         xj=xyzO[j][0]-shift[2][0]; yj=xyzO[j][1]-shift[2][1]; zj=xyzO[j][2]-shift[2][2]; disttest5=((xi-xj)**2+(yi-yj)**2+(zi-zj)**2)**.5
                         xj=xyzO[j][0]+shift[2][0]; yj=xyzO[j][1]+shift[2][1]; zj=xyzO[j][2]+shift[2][2]; disttest6=((xi-xj)**2+(yi-yj)**2+(zi-zj)**2)**.5
                     
+                        # Look across x and z
+                        xj=xyzO[j][0]-shift[0][0]-shift[2][0]; 
+                        yj=xyzO[j][1]-shift[0][1]-shift[2][1]; 
+                        zj=xyzO[j][2]-shift[0][2]-shift[2][2]; 
+                        disttest7=((xi-xj)**2+(yi-yj)**2+(zi-zj)**2)**.5
+                        
+                        xj=xyzO[j][0]+shift[0][0]-shift[2][0]; 
+                        yj=xyzO[j][1]+shift[0][1]-shift[2][1]; 
+                        zj=xyzO[j][2]+shift[0][2]-shift[2][2];
+                        disttest8=((xi-xj)**2+(yi-yj)**2+(zi-zj)**2)**.5
+                        
+                        xj=xyzO[j][0]-shift[0][0]+shift[2][0]; 
+                        yj=xyzO[j][1]-shift[0][1]+shift[2][1]; 
+                        zj=xyzO[j][2]-shift[0][2]+shift[2][2];
+                        disttest9=((xi-xj)**2+(yi-yj)**2+(zi-zj)**2)**.5
+                        
+                        xj=xyzO[j][0]+shift[0][0]+shift[2][0]; 
+                        yj=xyzO[j][1]+shift[0][1]+shift[2][1]; 
+                        zj=xyzO[j][2]+shift[0][2]+shift[2][2];
+                        disttest10=((xi-xj)**2+(yi-yj)**2+(zi-zj)**2)**.5
+                        
                         # Identify which cross-boundary search resulted in a nearest neighbor catch
                         T1 = disttest1<OOdist
                         T2 = disttest2<OOdist
                         T3 = disttest3<OOdist
                         T4 = disttest4<OOdist
                         T5 = disttest5<OOdist
-                        T6 = disttest6<OOdist                   
-                        whichone = np.where([T1,T2,T3,T4,T5,T6])
+                        T6 = disttest6<OOdist
+                        T7 = disttest7<OOdist
+                        T8 = disttest8<OOdist
+                        T9 = disttest9<OOdist
+                        T10 = disttest10<OOdist                   
+                        whichone = np.where([T1,T2,T3,T4,T5,T6,T7,T8,T9,T10])
                         test = np.size(whichone)
                     
                         # Record the shift information; this logic must be consistent with other shift logic in this loop
@@ -494,6 +583,16 @@ def getnni(xyzO,shift):
                             xyzshift[i,k] = -shift[2]
                         elif T6:
                             xyzshift[i,k] = shift[2]
+                        elif T7:
+                            xyzshift[i,k] = -shift[0]-shift[2]
+                        elif T8:
+                            xyzshift[i,k] = shift[0]-shift[2]
+                        elif T9:
+                            xyzshift[i,k] = -shift[0]+shift[2]
+                        elif T10:
+                            xyzshift[i,k] = shift[0]+shift[2]
+                        
+                            
                         
                         
                         # Record nearest neighbor information in the nni matrix, taking care to eliminate redundancies
