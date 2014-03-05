@@ -17,8 +17,10 @@ xyzO, xyzH1, xyzH2, viscinaldir, shift, vshift, xbox, ybox, zbox, structure = vs
 slab = vs.slab(filename,structure,xyzO, xyzH1, xyzH2, xbox, ybox, zbox)
 
 # Get some nearest neighbor information
-nni,xyzshift = vs.getnni(xyzO,shift)
+#nni,xyzshift = vs.getnni(xyzO,shift)
 
 # Reconstruct & rotate it, then save it
 slab.rotateit(viscinaldir,vshift)
 slab.saveit(outfilename)
+print slab.xbox, slab.ybox, slab.zbox
+
