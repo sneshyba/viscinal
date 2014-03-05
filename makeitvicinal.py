@@ -2,18 +2,25 @@ import vstuff as vs; reload(vs)
 import time
 
 # Get the spc slab (makes new xyzO, xyzH1, xyzH2, and shift-related arrays)
-#filename = 'spc_4_4_6.pdb'; nx = 4; ny = 4; nz = 6
-filename = 'spc_4_4_2.pdb'; nx = 4; ny = 4; nz = 2
+filename = 'spc_4_4_6.pdb'; nx = 4; ny = 4; nz = 6
+#filename = 'spc_4_4_2.pdb'; nx = 4; ny = 4; nz = 2
 #filename = 'spc_10_6_12.pdb'; nx = 10; ny = 6; nz = 12
 #filename = 'spc_10_6_14.pdb'; nx = 10; ny = 6; nz = 14
 
 # Naming the output file
 dum = filename.find('.pdb')
 outfilename = filename[0:dum]+'_v.pdb'
+badfilename = filename[0:dum]+'_v_orig.pdb'
+testfilename = filename[0:dum]+'_shift.pdb'
 
 # Specify which viscinal surface to generate, and load the slab
 viscinaldir = 'y'; nycel=1
 xyzO, xyzH1, xyzH2, viscinaldir, shift, vshift, xbox, ybox, zbox, structure = vs.loadit(filename, nx, ny, nz, viscinaldir, nycel)
+
+# Save the original slab 
+slab = vs.slab(testfilename,structure,xyzO, xyzH1, xyzH2)
+slab.saveit()
+
 
 # Get the nearest neighbor index and nearest-neighbor shift array
 nni,xyzshift = vs.getnni(xyzO,shift) 
@@ -35,10 +42,11 @@ slab_v.saveit()
 
 
 # Rotate a viscinal slab that has the original defects
-#xyzO_rot_orig, xyzH1_rot_orig, xyzH2_rot_orig, xboxp, yboxp, zboxp = vs.rotateit(xyzO, xyzH1, xyzH2, viscinaldir, shift, vshift, xbox, ybox, zbox)
+xyzO_rot_orig, xyzH1_rot_orig, xyzH2_rot_orig, xboxp, yboxp, zboxp = vs.rotateit(xyzO, xyzH1, xyzH2, viscinaldir, shift, vshift, xbox, ybox, zbox)
 
 # Save it
-#badfilename = filename[0:dum]+'_v_orig.pdb'
+slab_vorig = vs.slab(badfilename,structure,xyzO_rot_orig, xyzH1_rot_orig, xyzH2_rot_orig)
+slab_vorig.saveit()
 #vs.saveit(badfilename,structure,xyzO_rot_orig, xyzH1_rot_orig, xyzH2_rot_orig)
 #slab2 = vs.slab(badfilename,structure,xyzO_rot_orig, xyzH1_rot_orig, xyzH2_rot_orig)
 #slab2.saveit()

@@ -3,8 +3,8 @@ import numpy as np
 import copy
 
 # Get the spc slab (makes new xyzO, xyzH1, xyzH2, and shift-related arrays)
-#filename = 'spc_4_4_6.pdb'; nx = 4; ny = 4; nz = 6
-filename = 'spc_4_4_2.pdb'; nx = 4; ny = 4; nz = 2
+filename = 'spc_4_4_6.pdb'; nx = 4; ny = 4; nz = 6
+#filename = 'spc_4_4_2.pdb'; nx = 4; ny = 4; nz = 2
 #filename = 'spc_10_6_12.pdb'; nx = 10; ny = 6; nz = 12
 #filename = 'spc_10_6_14.pdb'; nx = 10; ny = 6; nz = 14
 
