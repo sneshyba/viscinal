@@ -5,15 +5,22 @@ import Bio.PDB
 import pdb
 
 class slab:
-    def __init__(self,filename,structure,xyzO, xyzH1, xyzH2):
+    def __init__(self,filename,structure,xyzO, xyzH1, xyzH2, xbox=0, ybox=0, zbox=0):
         self.xyzO = copy.deepcopy(xyzO)
         self.xyzH1 = copy.deepcopy(xyzH1)
         self.xyzH2 = copy.deepcopy(xyzH2)
         self.filename = copy.deepcopy(filename)
         self.structure = copy.deepcopy(structure)
+        self.xbox = xbox
+        self.ybox = ybox
+        self.zbox = zbox
+        self.NR = len(xyzO)
 
-    def saveit(self):
-        filename = self.filename
+
+    def saveit(self,filename=None):
+        if filename == None:
+            filename = self.filename
+        print 'saving ', filename
         structure = self.structure 
         xyzO = self.xyzO
         xyzH1 = self.xyzH1
@@ -56,6 +63,7 @@ class slab:
 
         # Get all the coordinates
         i = -1 # residue counter
+        NR = 0
         for model in structure:
             for chain in model:
                 oldchain = copy.deepcopy(chain)
@@ -64,10 +72,88 @@ class slab:
                     i = i+1 # residue counter
                     if i in badlist: 
                         chain.detach_child(residue.id)
+                    else:
+                        NR += 1
         self.xyzO  = np.delete(xyzO,badlist,0)
         self.xyzH1 = np.delete(xyzH1,badlist,0)
         self.xyzH2 = np.delete(xyzH2,badlist,0)
         self.structure = structure
+        self.NR = NR
+
+    def keep(self,keeplist):
+        alllist = range(self.NR)
+        otherlist = np.squeeze(np.argwhere(~np.in1d(alllist,keeplist)))
+        self.cullout(otherlist)
+
+    def rotateit(self,viscinaldir,vshift):
+        xyzO_step1 = copy.deepcopy(self.xyzO)
+        xyzH1_step1 = copy.deepcopy(self.xyzH1)
+        xyzH2_step1 = copy.deepcopy(self.xyzH2)
+        xyzO_step2 = np.zeros(np.shape(self.xyzO))
+        xyzH1_step2 = np.zeros(np.shape(self.xyzH1))
+        xyzH2_step2 = np.zeros(np.shape(self.xyzH2))
+        xbox = self.xbox
+        ybox = self.ybox
+        zbox = self.zbox
+        nR,dum = xyzO_step1.shape
+
+        if viscinaldir == 'y':  
+    
+            phi = np.arctan(vshift/zbox); print "phi =", phi*180/np.pi
+            zboxp = zbox/np.cos(phi)
+            yboxp = ybox*np.cos(phi)
+            xboxp = xbox
+            Rmat = np.array([[1,0,0],[0,np.cos(phi),np.sin(phi)],[0,-np.sin(phi),np.cos(phi)]])
+            line1_m = -np.tan(phi)
+            line1_b = ybox
+            line2_m = line1_m
+            line2_b = 0.0
+        
+            #print Rmat
+
+            for i in range(nR):
+   	        if (xyzO_step1[i,1] > line1_b + line1_m*xyzO_step1[i,2]):
+	           xyzO_step1[i,1] = xyzO_step1[i,1] - ybox
+	           xyzH1_step1[i,1] = xyzH1_step1[i,1] - ybox
+	           xyzH2_step1[i,1] = xyzH2_step1[i,1] - ybox
+	        if (xyzO_step1[i,1] < line2_b + line2_m*xyzO_step1[i,2]):
+	           xyzO_step1[i,1] = xyzO_step1[i,1] + ybox
+	           xyzH1_step1[i,1] = xyzH1_step1[i,1] + ybox
+	           xyzH2_step1[i,1] = xyzH2_step1[i,1] + ybox
+	        xyzO_step2[i,:] = np.dot(Rmat,xyzO_step1[i,:])
+	        xyzH1_step2[i,:] = np.dot(Rmat,xyzH1_step1[i,:])
+	        xyzH2_step2[i,:] = np.dot(Rmat,xyzH2_step1[i,:])
+	        if (xyzO_step2[i,2]<0):
+	           xyzO_step2[i,2] = xyzO_step2[i,2] + zboxp
+	           xyzH1_step2[i,2] = xyzH1_step2[i,2] + zboxp
+	           xyzH2_step2[i,2] = xyzH2_step2[i,2] + zboxp
+	        if (xyzO_step2[i,2]<0):
+	           xyzO_step2[i,2] = xyzO_step2[i,2] + zboxp
+	           xyzH1_step2[i,2] = xyzH1_step2[i,2] + zboxp
+	           xyzH2_step2[i,2] = xyzH2_step2[i,2] + zboxp
+	        if (xyzO_step2[i,2]>zboxp):
+	           xyzO_step2[i,2] = xyzO_step2[i,2] - zboxp
+	           xyzH1_step2[i,2] = xyzH1_step2[i,2] - zboxp
+	           xyzH2_step2[i,2] = xyzH2_step2[i,2] - zboxp
+	        if (xyzO_step2[i,2]>zboxp):
+	           xyzO_step2[i,2] = xyzO_step2[i,2] - zboxp
+	           xyzH1_step2[i,2] = xyzH1_step2[i,2] - zboxp
+	           xyzH2_step2[i,2] = xyzH2_step2[i,2] - zboxp
+
+        else:
+            print "Not implemented yet"
+ 
+        #return xyzO_step2, xyzH1_step2, xyzH2_step2, xboxp, yboxp, zboxp
+        self.xyzO = xyzO_step2
+        self.xyzH1 = xyzH1_step2
+        self.xyzH2 = xyzH2_step2
+        self.xbox = xboxp
+        self.ybox = yboxp
+        self.zbox = zboxp
+        return
+
+
+
 
 def loadit(filename, nx, ny, nz, viscinaldir='y', nycel=1):
 
