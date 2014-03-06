@@ -326,8 +326,6 @@ def finddefects(nni,nnltoi,nnitol):
     Ddefect=np.zeros((nR*10,2)).astype(np.int32); nDdefect = 0
     Adefect=np.zeros((nR*10,2)).astype(np.int32); nAdefect = 0
     for i in range(nR):
-        iDdefect = 0
-        iAdefect = 0
         for k in range(4):
             if (nni[i,k]>=0):
                 if (nnltoi[i,k]!=0) & (nnitol[i,k]!=0):
@@ -411,50 +409,6 @@ def donorsandacceptors(nni,xyzO,xyzH1,xyzH2,xyzshift):
     # Get the nnitol etc arrays
     nnitol, nnltoi = getnnitoletc(nni,xyzO,xyzH1,xyzH2,xyzshift)
     
-    '''
-    nnitol=np.zeros((nR,4), dtype='int32')
-    nnltoi=np.zeros((nR,4), dtype='int32')
-
-    # Minimium projection required in order call this a donor
-    HBproject = 2.7
-    
-    # Loop over all the residues
-    for i in range(nR):
-    
-        #Is l(k) donating to i?
-        for k in range(4):
-            if nni[i,k]>=0:
-                l= nni[i,k]
-                viO=xyzO[i]
-                vkO=xyzO[l]+xyzshift[i,k]
-                vkH1=xyzH1[l]+xyzshift[i,k]
-                vkH2=xyzH2[l]+xyzshift[i,k]
-                vOO=viO-vkO
-                vH1O=vkH1-vkO
-                vH2O=vkH2-vkO
-                #print i,l,np.dot(vOO, vH1O), np.dot(vOO, vH2O)
-                if np.dot(vOO, vH1O)>HBproject:
-                    nnltoi[i,k]=1
-                if np.dot(vOO, vH2O)>HBproject:
-                    nnltoi[i,k]=2
-    
-        #Is i donating to l(k)?
-        for k in range(4):
-	    if nni[i,k]>=0:
-                l= nni[i,k]
-                viO=xyzO[i]
-                vkO=xyzO[l]+xyzshift[i,k]
-                viH1=xyzH1[i]
-                viH2=xyzH2[i]
-                vOO=vkO-viO
-            	vH1O=viH1-viO
-                vH2O=viH2-viO
-                #print i,l,np.dot(vOO, vH1O), np.dot(vOO, vH2O)
-                if np.dot(vOO, vH1O)>HBproject:
-                    nnitol[i,k]=1
-                if np.dot(vOO, vH2O)>HBproject:
-                    nnitol[i,k]=2
-    '''
     
     # Fixing the missing H2 cases
     for i in range (nR):
@@ -784,7 +738,8 @@ def fixit(nni, nnitol_in, nnltoi_in, nprop):
             icount += 1
             #print "****"
             #print "Starting iprop = ", iprop, " w/NDdefect, NAdefect = ", len(Ddefect), len(Adefect)
-            m = random.randint(0,len(Ddefect)-1)
+            #m = random.randint(0,len(Ddefect)-1)
+            m = 0
             i = Ddefect[m,0]
             l = Ddefect[m,1]
             #print "working on ", i, l
@@ -1144,7 +1099,7 @@ def reconstructit(xyzO, xyzH1, xyzH2, nni, nnitol, xyzshift):
             # Just checking ... there had better be two free slots
             test = np.squeeze(np.argwhere(nni[i]==-1))
             if len(test)!=2:
-                print "Unexpected combination ... abort"
+                print "Unexpected combination in Reconstructit"
 
             # Get the tensor using hydrogen & lone pair nearest neighbors ... H is "H1" and the 1st lone pair is "H2"
             v21=(xyzO[j1ofi]+xyzshift[i,L1ofi])-(xyzO[k1ofi]+xyzshift[i,H1ofi]);                v21 = v21/np.linalg.norm(v21)
@@ -1176,7 +1131,7 @@ def reconstructit(xyzO, xyzH1, xyzH2, nni, nnitol, xyzshift):
             # Just checking ... there had better be two free slots
             test = np.squeeze(np.argwhere(nni[i]==-1))
             if len(test)!=2:
-                print "Unexpected combination ... abort"
+                print "Unexpected combination in Reconstructit"
 
             # Get the tensor using hydrogen & lone pair nearest neighbors ... H is "H2" and the 1st lone pair is "H1"
             v21=(xyzO[k2ofi]+xyzshift[i,H2ofi])-(xyzO[j1ofi]+xyzshift[i,L1ofi]);                v21 = v21/np.linalg.norm(v21)
@@ -1202,7 +1157,7 @@ def reconstructit(xyzO, xyzH1, xyzH2, nni, nnitol, xyzshift):
             vOdum, vH1dum, vH2dum = getrefcoords(xyzO_new[i],xyzH1_new[i],xyzH2_new[i])
                                          
         else:
-            print "Unexpected combination ...", i, nni[i], nnitol[i], "abort"
+            print "Unexpected combination in Reconstructit", i, nni[i], nnitol[i]
     
     return xyzO_new, xyzH1_new, xyzH2_new
     

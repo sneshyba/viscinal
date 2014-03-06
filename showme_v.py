@@ -3,10 +3,11 @@ import numpy as np
 import copy
 
 # Get the spc slab (makes new xyzO, xyzH1, xyzH2, and shift-related arrays)
-filename = 'spc_4_4_6_v_withdefects.pdb'; xbox=17.9629248; ybox=29.3333332974; zbox=23.3345234043
+#filename = 'spc_4_4_6_v_withdefects.pdb'; xbox=17.9629248; ybox=29.3333332974; zbox=23.3345234043
+filename = 'spc_4_4_6_v_withdefects_fixed.pdb'; xbox=17.9629248; ybox=29.3333332974; zbox=23.3345234043
 namestem = filename.find('.pdb')
 
-# Specify which viscinal surface to generate, and load the slab
+# Specify which is the exposed surface, and load the slab
 viscinaldir = 'y'; nycel=0
 xyzO, xyzH1, xyzH2, shift, structure = vs.loaditnew(filename, xbox, ybox, zbox, viscinaldir)
 slab = vs.slab(filename, structure, xyzO, xyzH1, xyzH2, xbox, ybox, zbox)

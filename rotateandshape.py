@@ -16,9 +16,6 @@ viscinaldir = 'y'; nycel=1
 xyzO, xyzH1, xyzH2, viscinaldir, shift, vshift, xbox, ybox, zbox, structure = vs.loadit(filename, nx, ny, nz, viscinaldir, nycel)
 slab = vs.slab(filename,structure,xyzO, xyzH1, xyzH2, xbox, ybox, zbox)
 
-# Get some nearest neighbor information
-#nni,xyzshift = vs.getnni(xyzO,shift)
-
 # Reconstruct & rotate it, then save it
 slab.rotateit(viscinaldir,vshift)
 slab.saveit(outfilename)
