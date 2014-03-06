@@ -352,8 +352,8 @@ def findthreezeros(nni,nnitol):
             #print "There's a problem at i, nni, nnitol =", i, nni[i], nnitol[i]
             problem = True
     return problem
-    
-def donorsandacceptors(nni,xyzO,xyzH1,xyzH2,xyzshift):
+
+def getnnitoletc(nni,xyzO,xyzH1,xyzH2,xyzshift):
 
     # Pre-allocate the nnitol and nnltoi arrays
     nR, nk = nni.shape; #print nR, nk
@@ -399,6 +399,62 @@ def donorsandacceptors(nni,xyzO,xyzH1,xyzH2,xyzshift):
                     nnitol[i,k]=1
                 if np.dot(vOO, vH2O)>HBproject:
                     nnitol[i,k]=2
+    
+    return nnitol, nnltoi
+
+            
+def donorsandacceptors(nni,xyzO,xyzH1,xyzH2,xyzshift):
+
+    # Pre-allocate the nnitol and nnltoi arrays
+    nR, nk = nni.shape; #print nR, nk
+    
+    # Get the nnitol etc arrays
+    nnitol, nnltoi = getnnitoletc(nni,xyzO,xyzH1,xyzH2,xyzshift)
+    
+    '''
+    nnitol=np.zeros((nR,4), dtype='int32')
+    nnltoi=np.zeros((nR,4), dtype='int32')
+
+    # Minimium projection required in order call this a donor
+    HBproject = 2.7
+    
+    # Loop over all the residues
+    for i in range(nR):
+    
+        #Is l(k) donating to i?
+        for k in range(4):
+            if nni[i,k]>=0:
+                l= nni[i,k]
+                viO=xyzO[i]
+                vkO=xyzO[l]+xyzshift[i,k]
+                vkH1=xyzH1[l]+xyzshift[i,k]
+                vkH2=xyzH2[l]+xyzshift[i,k]
+                vOO=viO-vkO
+                vH1O=vkH1-vkO
+                vH2O=vkH2-vkO
+                #print i,l,np.dot(vOO, vH1O), np.dot(vOO, vH2O)
+                if np.dot(vOO, vH1O)>HBproject:
+                    nnltoi[i,k]=1
+                if np.dot(vOO, vH2O)>HBproject:
+                    nnltoi[i,k]=2
+    
+        #Is i donating to l(k)?
+        for k in range(4):
+	    if nni[i,k]>=0:
+                l= nni[i,k]
+                viO=xyzO[i]
+                vkO=xyzO[l]+xyzshift[i,k]
+                viH1=xyzH1[i]
+                viH2=xyzH2[i]
+                vOO=vkO-viO
+            	vH1O=viH1-viO
+                vH2O=viH2-viO
+                #print i,l,np.dot(vOO, vH1O), np.dot(vOO, vH2O)
+                if np.dot(vOO, vH1O)>HBproject:
+                    nnitol[i,k]=1
+                if np.dot(vOO, vH2O)>HBproject:
+                    nnitol[i,k]=2
+    '''
     
     # Fixing the missing H2 cases
     for i in range (nR):
