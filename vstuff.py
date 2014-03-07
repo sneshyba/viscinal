@@ -1220,3 +1220,8 @@ def rotateit(xyzO_new, xyzH1_new, xyzH2_new, viscinaldir, shift, vshift, xbox, y
         print "Not implemented yet"
  
     return xyzO_step2, xyzH1_step2, xyzH2_step2, xboxp, yboxp, zboxp
+
+def count_unique(keys):
+    uniq_keys = np.unique(keys)
+    bins = uniq_keys.searchsorted(keys)
+    return uniq_keys, np.bincount(bins)

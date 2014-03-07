@@ -43,3 +43,12 @@ slab_Adefect.filename = filename[0:namestem]+'_Adefect.pdb'
 slab_Adefect.keep(Adefectlist)
 slab_Adefect.saveit()
 
+# Save instances where there are three -1's in nni
+a1,b1 = vs.count_unique(surfacelist)
+a1[np.argwhere(b1==1)]
+a2,b2 = vs.count_unique(surfacelist)
+a2[np.argwhere(b2==2)]
+a3,b3 = vs.count_unique(surfacelist)
+a3[np.argwhere(b3==3)]
+a4,b4 = vs.count_unique(surfacelist)
+a4[np.argwhere(b4==4)]
