@@ -3,7 +3,10 @@ import numpy as np
 import copy
 
 # Get the spc slab (makes new xyzO, xyzH1, xyzH2, and shift-related arrays)
-filename = 'spc_4_4_6_v_withdefects.pdb'; xbox=17.9629248; ybox=29.3333332974; zbox=23.3345234043
+#filename = 'spc_4_4_6_v_withdefects.pdb'; xbox=17.9629248; ybox=29.3333332974; zbox=23.3345234043
+#namestem = filename.find('.pdb')
+
+filename = 'spc_4_4_6_v5_withdefects.pdb'; xbox=17.9629248; ybox=30.6376674579 ; zbox=22.3411052195
 namestem = filename.find('.pdb')
 
 # Specify which is the exposed surface, and load the slab

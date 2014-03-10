@@ -4,7 +4,12 @@ import copy
 
 # Get the spc slab (makes new xyzO, xyzH1, xyzH2, and shift-related arrays)
 #filename = 'spc_4_4_6_v_withdefects.pdb'; xbox=17.9629248; ybox=29.3333332974; zbox=23.3345234043
-filename = 'spc_4_4_6_v_withdefects_fixed.pdb'; xbox=17.9629248; ybox=29.3333332974; zbox=23.3345234043
+
+#filename = 'spc_4_4_6_v_withdefects_fixed.pdb'; xbox=17.9629248; ybox=29.3333332974; zbox=23.3345234043
+# vmd: set cell [pbc set {17.9629248 29.333333 23.3345234} -all]; pbc box
+
+filename = 'spc_4_4_6_v5_withdefects_fixed.pdb'; xbox=17.9629248; ybox=30.6376674579 ; zbox=22.3411052195
+# vmd: set cell [pbc set {17.9629248 30.6376674579 22.3411052195} -all]; pbc box
 namestem = filename.find('.pdb')
 
 # Specify which is the exposed surface, and load the slab
