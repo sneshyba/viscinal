@@ -1,4 +1,4 @@
-viscinal
+vicinal
 ========
 
-Creates viscinal ice surfaces
+Creates vicinal ice surfaces
